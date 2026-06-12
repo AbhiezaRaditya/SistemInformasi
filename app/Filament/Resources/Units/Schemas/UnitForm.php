@@ -13,11 +13,13 @@ class UnitForm
         return $schema
             ->components([
                 TextInput::make('name')
+                      ->label('Nama Himpunan')
                     ->required(),
                 TextInput::make('codename')
+                     ->label('Kode Unit')
                     ->required(),
                 Select::make('study_program_id')
-                ->label('Study Program')
+                ->label('Program Studi')
                 ->relationship('studyProgram', 'codename')
                 ->required()
                 ->searchable()

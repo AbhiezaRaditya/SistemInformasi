@@ -12,8 +12,11 @@ class StudyProgramForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label('Program Studi')
                     ->required(),
+
                 TextInput::make('codename')
+                    ->label('Kode Prodi')
                     ->required(),
             ]);
     }

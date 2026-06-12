@@ -1,0 +1,315 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap');
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/* =====================================
+   BACKGROUND UTAMA
+===================================== */
+html,
+body,
+.fi-body,
+.fi-main,
+.fi-main-ctn {
+    background: #dbeafe !important;
+}
+
+/* =====================================
+   SIDEBAR
+===================================== */
+.fi-sidebar {
+    background: linear-gradient(
+        180deg,
+        #1e40af 0%,
+        #1d4ed8 50%,
+        #2563eb 100%
+    ) !important;
+    border-right: none !important;
+    box-shadow:
+        6px 0 25px rgba(37, 99, 235, 0.25),
+        inset -1px 0 0 rgba(255,255,255,0.08);
+}
+
+/* =====================================
+   SIDEBAR HEADER (DESKTOP)
+===================================== */
+.fi-sidebar-header {
+    padding: 0.75rem 1rem !important;
+    background: transparent !important;
+}
+
+.fi-sidebar-header > a,
+.fi-sidebar-header a,
+.fi-sidebar-header a:hover {
+    display: block !important;
+    width: 100% !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+}
+
+.custom-brand-container {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    white-space: nowrap !important;
+    background: transparent !important;
+}
+
+.custom-brand-logo {
+    height: 4rem !important;
+    width: 4rem !important;
+    object-fit: contain !important;
+    flex-shrink: 0 !important;
+}
+
+.custom-brand-text {
+    font-family: 'Nunito', sans-serif !important;
+    color: #ffffff !important;
+    font-weight: 900 !important;
+    font-size: 1.25rem !important;
+    letter-spacing: -0.2px !important;
+    line-height: 1.2 !important;
+    display: inline-block !important;
+    white-space: normal !important;
+    max-width: 160px !important;
+}
+
+/* =====================================
+   SIDEBAR NAV
+===================================== */
+.fi-sidebar-nav *,
+.fi-sidebar-nav a,
+.fi-sidebar-nav span,
+.fi-sidebar-nav button,
+.fi-sidebar-nav div {
+    color: #ffffff !important;
+}
+
+.fi-sidebar-nav svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+.fi-sidebar .fi-sidebar-group-label {
+    color: #dbeafe !important;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* =====================================
+   ITEM MENU
+===================================== */
+.fi-sidebar .fi-sidebar-item {
+    transition: all .25s ease;
+}
+
+.fi-sidebar .fi-sidebar-item-label {
+    color: #ffffff !important;
+    font-weight: 500;
+}
+
+.fi-sidebar .fi-sidebar-item:hover,
+.fi-sidebar .fi-sidebar-item:hover .fi-sidebar-item-button,
+.fi-sidebar .fi-sidebar-item:hover a {
+    background: rgba(255,255,255,0.15) !important;
+    border-radius: 12px;
+    transform: translateX(4px);
+}
+
+.fi-sidebar .fi-sidebar-item:hover .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item:hover svg,
+.fi-sidebar .fi-sidebar-item:hover * {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* =====================================
+   MENU AKTIF
+===================================== */
+.fi-sidebar .fi-sidebar-item.fi-active,
+.fi-sidebar .fi-sidebar-item.fi-active .fi-sidebar-item-button,
+.fi-sidebar .fi-sidebar-item.fi-active a {
+    background: rgba(255,255,255,0.25) !important;
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+}
+
+.fi-sidebar .fi-sidebar-item.fi-active .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item.fi-active * {
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
+.fi-sidebar .fi-sidebar-item.fi-active svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+/* =====================================
+   TOPBAR
+===================================== */
+.fi-topbar .custom-brand-text {
+    font-family: 'Nunito', sans-serif !important;
+    color: #1e293b !important;
+    font-size: 1.6rem !important;
+    font-weight: 900 !important;
+    max-width: none !important;
+    white-space: nowrap !important;
+    line-height: 1.2 !important;
+}
+
+/* =====================================
+   HALAMAN LOGIN
+===================================== */
+.fi-simple-layout .custom-brand-container,
+.fi-simple-main .custom-brand-container {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    margin-bottom: 25px !important;
+}
+
+.fi-simple-layout .custom-brand-logo,
+.fi-simple-main .custom-brand-logo {
+    width: 65px !important;
+    height: 65px !important;
+    margin: 0 !important;
+}
+
+.fi-simple-layout .custom-brand-text,
+.fi-simple-main .custom-brand-text {
+    font-size: 1.6rem !important;
+    font-weight: 900 !important;
+    line-height: 1.2 !important;
+    text-align: left !important;
+    margin: 0 !important;
+    max-width: none !important;
+    white-space: nowrap !important;
+    color: #1e293b !important;
+}
+
+/* Hilangkan heading "Masuk" bawaan */
+.fi-simple-header-heading {
+    display: none !important;
+}
+
+/* Judul login tambahan jika ada */
+.fi-simple-main h1,
+.fi-simple-main h2 {
+    margin-top: 1rem !important;
+    text-align: center !important;
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+    color: #111827 !important;
+}
+
+/* =====================================
+   CARD
+===================================== */
+.fi-section,
+.fi-widget,
+.fi-ta,
+.fi-card {
+    border-radius: 16px !important;
+    transition: all .25s ease;
+}
+
+.fi-section:hover,
+.fi-widget:hover,
+.fi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59,130,246,0.12);
+}
+
+/* =====================================
+   TOMBOL
+===================================== */
+.fi-btn-color-primary {
+    background: linear-gradient(135deg, #0ea5e9, #2563eb) !important;
+    border: none !important;
+    transition: all .25s ease;
+}
+
+.fi-btn-color-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(37,99,235,.35);
+}
+
+/* =====================================
+   TABEL
+===================================== */
+.fi-ta-table tbody tr {
+    transition: all .2s ease;
+}
+
+.fi-ta-table tbody tr:hover {
+    background: rgba(59,130,246,.05) !important;
+}
+
+/* =====================================
+   ANIMASI FADE
+===================================== */
+.fi-main {
+    animation: fadeIn .4s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =====================================
+   LOGO DESKTOP SIZING
+===================================== */
+.fi-topbar .custom-brand-logo,
+.fi-sidebar-header .custom-brand-logo {
+    width: 3.2rem !important;
+    height: 3.2rem !important;
+    min-width: 3.2rem !important;
+    max-width: 3.2rem !important;
+    min-height: 3.2rem !important;
+    max-height: 3.2rem !important;
+}
+
+/* =====================================
+   MOBILE VIEW (KOTAK PUTIH TETAP ADA)
+===================================== */
+@media (max-width: 1024px) {
+    .fi-sidebar-header {
+        background: #ffffff !important; /* Kotak putih dikembalikan */
+        border-bottom: 1px solid #bfdbfe !important; 
+        padding: 0.65rem 0.85rem !important;
+    }
+
+    .fi-sidebar-header > a,
+    .fi-sidebar-header a {
+        background: transparent !important;
+    }
+
+    .custom-brand-container {
+        gap: 10px !important;
+        width: 100% !important;
+    }
+
+    .custom-brand-logo {
+        height: 3.5rem !important;
+        width: 3.5rem !important;
+    }
+
+    .custom-brand-text {
+        font-family: 'Nunito', sans-serif !important;
+        color: #1e293b !important;       /* Warna teks dikembalikan gelap/hitam */
+        font-size: 1.6rem !important;    /* UKURAN TETAP BESAR SAMA SEPERTI DESKTOP */
+        font-weight: 900 !important;
+        max-width: none !important;      /* Dilebarkan agar muat dalam satu baris */
+        white-space: nowrap !important;  /* Dipaksa lurus menyamping, tidak patah ke bawah */
+        line-height: 1.2 !important;
+    }
+}

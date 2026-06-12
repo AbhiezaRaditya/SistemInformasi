@@ -14,16 +14,19 @@ class UserForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label('Nama')
                     ->required(),
                 TextInput::make('username')
+                     ->label('Username')
                     ->required(),
                 Select::make('roles')
+                    ->label('Role')
                     ->relationship('roles', 'name')
                     ->multiple()
                     ->preload()
                     ->searchable(),
                 Select::make('study_program_id')
-                    ->label('Study Program')
+                    ->label('Program Studi')
                     ->relationship('studyProgram', 'codename')
                     ->searchable()
                     ->preload(),

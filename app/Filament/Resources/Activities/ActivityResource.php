@@ -22,6 +22,10 @@ class ActivityResource extends Resource
 {
     protected static ?string $model = Activity::class;
 
+    protected static ?string $navigationLabel = 'Aktivitas Kemahasiswaan';
+    protected static ?string $modelLabel = 'Aktivitas Kemahasiswaan';
+    protected static ?string $pluralModelLabel = 'Aktivitas Kemahasiswaan';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema
@@ -58,14 +62,12 @@ class ActivityResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-
         $query = parent::getEloquentQuery();
-        
 
         $user = Auth::user();
 
         if ($user->hasRole('super_admin')) {
-            return $query; 
+            return $query;
         }
 
         if ($user->hasRole('kaprodi')) {

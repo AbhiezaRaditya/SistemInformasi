@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\Activities\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -15,59 +13,63 @@ class ActivitiesTable
     {
         return $table
             ->columns([
+                TextColumn::make('no')
+                    ->label('No')
+                    ->rowIndex(),
+
                 TextColumn::make('pengurus_unit.name')
-                    ->label('Name')
+                    ->label('Nama Pengurus')
                     ->searchable()
                     ->sortable(),
-
-                    // TextColumn::make('Himpunan_role')
-                    // ->label('Himpunan Role')
-                    // ->getStateUsing(fn ($record)=>
-                    // str(
-                    //     $record->Himpunan?->getRoleNames()->first() ?? "User"
-                    //     )->replace('_',' ')->title()
-                    // )
-                    // ->badge()
-                    // ->color('success')
-                    // ->sortable(false)
-                    // ->toggleable(),
 
                 TextColumn::make('title')
+                    ->label('Judul Aktivitas')
                     ->searchable(),
-                    TextColumn::make('category.name')
-                    ->label('kategori')
+
+                TextColumn::make('category.name')
+                    ->label('Kategori Kegiatan')
                     ->searchable()
                     ->sortable(),
+
                 TextColumn::make('tanggal_berlangsung')
                     ->label('Tanggal Berlangsung')
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->tooltip(fn ($record) =>
+                        'Mulai: ' . \Carbon\Carbon::parse($record->tanggal_berlangsung)->format('d M Y') .
+                        ' | Selesai: ' . \Carbon\Carbon::parse($record->tanggal_berakhir)->format('d M Y')
+                    ),
+
                 TextColumn::make('tanggal_berakhir')
                     ->label('Tanggal Berakhir')
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->tooltip(fn ($record) =>
+                        'Mulai: ' . \Carbon\Carbon::parse($record->tanggal_berlangsung)->format('d M Y') .
+                        ' | Selesai: ' . \Carbon\Carbon::parse($record->tanggal_berakhir)->format('d M Y')
+                    ),
+
                 TextColumn::make('status')
-                    ->badge(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'draft'   => 'danger',
+                        'pending' => 'warning',
+                        'revisi'  => 'info',
+                        'accept'  => 'success',
+                        'reject'  => 'danger',
+                        default   => 'gray',
+                    }),
             ])
             ->filters([
                 //
             ])
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+                ViewAction::make()
+                    ->label('Detail'),
+
+                EditAction::make()
+                    ->label('Ubah'),
             ]);
     }
 }

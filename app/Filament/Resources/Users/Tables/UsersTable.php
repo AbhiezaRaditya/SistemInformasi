@@ -2,11 +2,7 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
@@ -18,64 +14,53 @@ class UsersTable
     {
         return $table
             ->columns([
+                TextColumn::make('no')
+                    ->label('No')
+                    ->rowIndex(),
+
                 TextColumn::make('name')
+                    ->label('Nama')
                     ->searchable(),
+
                 TextColumn::make('role')
                     ->label('Role')
                     ->getStateUsing(
-                        fn($record) => str($record->getRoleNames()->first() ?? 'User')
+                        fn ($record) => str($record->getRoleNames()->first() ?? 'User')
                             ->replace('_', ' ')
                             ->title()
                     )
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'Super Admin' => 'danger',
                         'Kaprodi' => 'info',
                         'Himpunan' => 'warning',
                         default => 'gray',
                     }),
+
                 TextColumn::make('studyProgram.codename')
-                    ->label('studyprogram')
+                    ->label('Program Studi')
                     ->searchable()
                     ->sortable()
                     ->placeholder('-'),
+
                 TextColumn::make('unit.codename')
-                    ->label('unit')
+                    ->label('Unit')
                     ->searchable()
                     ->sortable()
                     ->placeholder('-'),
-                // TextColumn::make('email')
-                //     ->label('Email address')
-                //     ->searchable(),
-                // TextColumn::make('email_verified_at')
-                //     ->dateTime()
-                //     ->sortable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 TrashedFilter::make(),
             ])
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
+                ViewAction::make()
+                    ->label('Detail'),
+
+                EditAction::make()
+                    ->label('Ubah'),
             ])
             ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
-                ]),
+                //
             ]);
     }
 }

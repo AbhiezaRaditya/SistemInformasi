@@ -22,6 +22,10 @@ class StudyProgramResource extends Resource
 {
     protected static ?string $model = StudyProgram::class;
 
+    protected static ?string $navigationLabel = 'Program Studi';
+    protected static ?string $modelLabel = 'Program Studi';
+    protected static ?string $pluralModelLabel = 'Program Studi';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema
