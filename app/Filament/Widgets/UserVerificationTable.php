@@ -43,4 +43,4 @@ class UserVerificationTable extends TableWidget
                     }),
             ]);
     }
-}
+} 

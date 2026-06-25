@@ -232,14 +232,14 @@ body,
    TOMBOL
 ===================================== */
 .fi-btn-color-primary {
-    background: linear-gradient(135deg, #0ea5e9, #2563eb) !important;
+    background: linear-gradient(135deg, #000000, #000000) !important;
     border: none !important;
     transition: all .25s ease;
 }
 
 .fi-btn-color-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 18px rgba(37,99,235,.35);
+    box-shadow: 0 8px 18px rgb(255, 255, 255);
 }
 
 /* =====================================
@@ -266,6 +266,49 @@ body,
 }
 
 /* =====================================
+   ROLE BADGE — status login user
+===================================== */
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+
+.role-badge-danger {
+    background-color: #fef2f2;
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+.role-badge-warning {
+    background-color: #fffbeb;
+    color: #d97706;
+    border-color: #fde68a;
+}
+
+.role-badge-info {
+    background-color: #eff6ff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+}
+
+.role-badge-success {
+    background-color: #f0fdf4;
+    color: #16a34a;
+    border-color: #bbf7d0;
+}
+
+.role-badge-gray {
+    background-color: #f9fafb;
+    color: #4b5563;
+    border-color: #e5e7eb;
+}
+
+/* =====================================
    LOGO DESKTOP SIZING
 ===================================== */
 .fi-topbar .custom-brand-logo,
@@ -279,37 +322,47 @@ body,
 }
 
 /* =====================================
-   MOBILE VIEW (KOTAK PUTIH TETAP ADA)
+   MOBILE VIEW
 ===================================== */
 @media (max-width: 1024px) {
     .fi-sidebar-header {
-        background: #ffffff !important; /* Kotak putih dikembalikan */
-        border-bottom: 1px solid #bfdbfe !important; 
-        padding: 0.65rem 0.85rem !important;
+        background: #ffffff !important;
+        border-bottom: 1px solid #bfdbfe !important;
+        padding: 1.75rem 0.85rem 1.25rem !important;
+        height: auto !important;
+        min-height: unset !important;
     }
 
     .fi-sidebar-header > a,
     .fi-sidebar-header a {
         background: transparent !important;
+        height: auto !important;
     }
 
     .custom-brand-container {
         gap: 10px !important;
         width: 100% !important;
+        align-items: center !important; /* logo & teks sejajar tengah blok */
     }
 
     .custom-brand-logo {
         height: 3.5rem !important;
         width: 3.5rem !important;
+        margin-top: 0 !important;
+        flex-shrink: 0 !important;
     }
 
     .custom-brand-text {
         font-family: 'Nunito', sans-serif !important;
-        color: #1e293b !important;       /* Warna teks dikembalikan gelap/hitam */
-        font-size: 1.6rem !important;    /* UKURAN TETAP BESAR SAMA SEPERTI DESKTOP */
+        color: #1e293b !important;
+        font-size: 1.5rem !important;
         font-weight: 900 !important;
-        max-width: none !important;      /* Dilebarkan agar muat dalam satu baris */
-        white-space: nowrap !important;  /* Dipaksa lurus menyamping, tidak patah ke bawah */
-        line-height: 1.2 !important;
+        line-height: 1.1 !important;
+        margin-top: 0.4rem !important;   /* makin besar angka ini = makin turun */
+        max-width: none !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
     }
 }
