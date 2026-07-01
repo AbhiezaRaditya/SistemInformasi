@@ -39,12 +39,20 @@ class ActivityInfolist
                         TextEntry::make('status')
                             ->label('Status')
                             ->badge()
-                            ->color(fn (string $state) => match ($state) {
-                                'draft' => 'gray',
+                            ->formatStateUsing(fn($state) => match ($state) {
+                                'reject' => 'Ditolak',
+                                'dalam_realisasi' => 'Dalam Realisasi',
+                                'completed' => 'Selesai',
+                                default => $state,
+                            })
+                            ->color(fn(string $state) => match ($state) {
+                                'draft'   => 'danger',
                                 'pending' => 'warning',
-                                'revisi' => 'info',
-                                'accept' => 'success',
-                                'reject' => 'danger',
+                                'revisi'  => 'info',
+                                'accept'  => 'success',
+                                'reject'  => 'danger',
+                                'completed' => 'success',
+                                'dalam_realisasi' => 'info',
                                 default => 'gray',
                             }),
 
@@ -61,7 +69,7 @@ class ActivityInfolist
                         TextEntry::make('catatan_revisi')
                             ->label('Catatan Revisi')
                             ->html()
-                            ->formatStateUsing(fn ($state) => "
+                            ->formatStateUsing(fn($state) => "
                                 <div style='
                                     background: rgba(255, 235, 59, 0.20);
                                     border-left: 4px solid #facc15;
@@ -72,20 +80,42 @@ class ActivityInfolist
                                 </div>
                             ")
                             ->columnSpanFull()
-                            ->visible(fn ($record) => filled($record->catatan_revisi)),
+                            ->visible(fn($record) => filled($record->catatan_revisi)),
                     ]),
 
                 Section::make('Dokumen Lampiran')
                     ->schema([
                         TextEntry::make('attachment')
                             ->label('Nama File')
-                            ->formatStateUsing(fn ($state) => basename($state))
+                            ->formatStateUsing(fn($state) => basename($state))
                             ->icon('heroicon-o-document')
                             ->color('primary')
-                            ->url(fn ($state) => asset('storage/' . $state))
+                            ->url(fn($state) => $state ? asset('storage/' . $state) : null)
                             ->openUrlInNewTab(),
                     ])
-                    ->visible(fn ($record) => filled($record->attachment)),
+                    ->visible(fn($record) => filled($record->attachment)),
+
+
+                    
+                Section::make('Dokumen Realisasi')
+                    ->schema([
+                        TextEntry::make('realization_file')
+                            ->label('File Realisasi / LPJ')
+                            ->formatStateUsing(function ($state) {
+                                if (is_array($state)) {
+                                    return implode(', ', array_map('basename', $state));
+                                }
+                                return $state ? basename($state) : null;
+                            })
+                            ->icon('heroicon-o-document-check')
+                            ->color('success')
+                            ->url(function ($state) {
+                                $path = is_array($state) ? ($state[0] ?? null) : $state;
+                                return $path ? asset('storage/' . $path) : null;
+                            })
+                            ->openUrlInNewTab(),
+                    ])
+                    ->visible(fn($record) => filled($record->realization_file)),
 
                 Section::make('Timestamps')
                     ->columns(2)

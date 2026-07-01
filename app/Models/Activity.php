@@ -18,11 +18,14 @@ class Activity extends Model
         'unit_id',
         'catatan_revisi',
         'category_id',
+        'realization_file',
     ];
 
     protected $casts = [
         'attachment' => 'array',
+        'realization_file' => 'array'
     ];
+
 
     /**
      * Relasi ke user pengaju aktivitas

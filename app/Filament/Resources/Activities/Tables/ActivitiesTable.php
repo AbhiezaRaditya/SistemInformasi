@@ -6,6 +6,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class ActivitiesTable
 {
@@ -35,29 +36,40 @@ class ActivitiesTable
                     ->label('Tanggal Berlangsung')
                     ->date()
                     ->sortable()
-                    ->tooltip(fn ($record) =>
+                    ->tooltip(
+                        fn($record) =>
                         'Mulai: ' . \Carbon\Carbon::parse($record->tanggal_berlangsung)->format('d M Y') .
-                        ' | Selesai: ' . \Carbon\Carbon::parse($record->tanggal_berakhir)->format('d M Y')
+                            ' | Selesai: ' . \Carbon\Carbon::parse($record->tanggal_berakhir)->format('d M Y')
                     ),
 
                 TextColumn::make('tanggal_berakhir')
                     ->label('Tanggal Berakhir')
                     ->date()
                     ->sortable()
-                    ->tooltip(fn ($record) =>
+                    ->tooltip(
+                        fn($record) =>
                         'Mulai: ' . \Carbon\Carbon::parse($record->tanggal_berlangsung)->format('d M Y') .
-                        ' | Selesai: ' . \Carbon\Carbon::parse($record->tanggal_berakhir)->format('d M Y')
+                            ' | Selesai: ' . \Carbon\Carbon::parse($record->tanggal_berakhir)->format('d M Y')
                     ),
 
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'pending' => 'Pending',
+                        'reject' => 'Ditolak',
+                        'dalam_realisasi' => 'Dalam Realisasi',
+                        'completed' => 'Selesai',
+                        default => $state,
+                    })
+                    ->color(fn(string $state): string => match ($state) {
                         'draft'   => 'danger',
                         'pending' => 'warning',
                         'revisi'  => 'info',
-                        'accept'  => 'success',
+                        // 'accept'  => 'success',
                         'reject'  => 'danger',
+                        'completed' => 'success',
+                        'dalam_realisasi' => 'info',
                         default   => 'gray',
                     }),
             ])
@@ -69,7 +81,8 @@ class ActivitiesTable
                     ->label('Detail'),
 
                 EditAction::make()
-                    ->label('Ubah'),
+                    ->label('Ubah')
+                    ->hidden(fn() => Auth::user()->hasRole('kaprodi')),
             ]);
     }
 }

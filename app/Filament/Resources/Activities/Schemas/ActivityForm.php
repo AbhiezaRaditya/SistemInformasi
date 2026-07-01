@@ -50,43 +50,43 @@ class ActivityForm
                     ->searchable()
                     ->preload(),
 
-                Select::make('status')
-                    ->label('Status Persetujuan')
-                    ->options([
-                        'revisi' => 'Revisi',
-                        'accept' => 'Disetujui',
-                        'reject' => 'Ditolak',
-                    ])
-                    ->default('draft')
-                    ->live()
-                    ->visible(
-                        fn () => Auth::user()->hasRole([
-                            'kaprodi',
-                            'super_admin',
-                        ])
-                    ),
+                // Select::make('status')
+                //     ->label('Status Persetujuan')
+                //     ->options([
+                //         'revisi' => 'Revisi',
+                //         'accept' => 'Disetujui',
+                //         'reject' => 'Ditolak',
+                //     ])
+                //     ->default('draft')
+                //     ->live()
+                //     ->visible(
+                //         fn () => Auth::user()->hasRole([
+                //             'kaprodi',
+                //             'super_admin',
+                //         ])
+                //     ),
 
-                Textarea::make('catatan_revisi')
-                    ->label('Catatan Revisi / Penolakan dari Kaprodi')
-                    ->required(
-                        fn ($get) => in_array(
-                            $get('status'),
-                            ['revisi', 'reject']
-                        )
-                    )
-                    ->visible(
-                        fn ($get) => in_array(
-                            $get('status'),
-                            ['revisi', 'reject']
-                        )
-                    )
-                    ->disabled(
-                        fn () => ! Auth::user()->hasRole([
-                            'kaprodi',
-                            'super_admin',
-                        ])
-                    )
-                    ->columnSpanFull(),
+                // Textarea::make('catatan_revisi')
+                //     ->label('Catatan Revisi / Penolakan dari Kaprodi')
+                //     ->required(
+                //         fn ($get) => in_array(
+                //             $get('status'),
+                //             ['revisi', 'reject']
+                //         )
+                //     )
+                //     ->visible(
+                //         fn ($get) => in_array(
+                //             $get('status'),
+                //             ['revisi', 'reject']
+                //         )
+                //     )
+                //     ->disabled(
+                //         fn () => ! Auth::user()->hasRole([
+                //             'kaprodi',
+                //             'super_admin',
+                //         ])
+                //     )
+                //     ->columnSpanFull(),
             ]);
     }
 }
