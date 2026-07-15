@@ -27,17 +27,30 @@ class UserInfolist
                                     ->replace('_', ' ')
                                     ->title()
                             )
-                            ->badge(),
+                            ->badge()
+                            // PERBAIKAN: Mengembalikan warna badge sesuai role di halaman View
+                            ->color(fn (string $state): string => match ($state) {
+                                'Super Admin' => 'danger',
+                                'Kaprodi'     => 'info',
+                                'Himpunan'    => 'warning',
+                                default       => 'gray',
+                            }),
 
                         TextEntry::make('username')
                             ->label('Username'),
 
                         TextEntry::make('studyProgram.codename')
                             ->label('Program Studi')
+                            // PERBAIKAN: Hanya pasang badge jika data relasi prodi tidak kosong
+                            ->badge(fn ($record) => !empty($record->studyProgram?->codename))
+                            ->color('success')
                             ->placeholder('-'),
 
                         TextEntry::make('unit.codename')
                             ->label('Unit')
+                            // PERBAIKAN: Hanya pasang badge jika data relasi unit tidak kosong
+                            ->badge(fn ($record) => !empty($record->unit?->codename))
+                            ->color('info')
                             ->placeholder('-'),
                     ]),
 

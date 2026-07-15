@@ -23,9 +23,38 @@ class Activity extends Model
 
     protected $casts = [
         'attachment' => 'array',
-        'realization_file' => 'array'
+        'realization_file' => 'array',
+        'pending_at' => 'datetime',
+        'revisi_at' => 'datetime',
+        'reject_at' => 'datetime',
+        'realisasi_at' => 'datetime',
+        'completed_at' => 'datetime',
     ];
 
+    /**
+     * Catat waktu setiap kali status berubah.
+     * Bisa berulang-ulang, timestamp selalu ditimpa dengan yang terbaru.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (Activity $activity) {
+            if (! $activity->isDirty('status')) {
+                return;
+            }
+
+            $map = [
+                'pending'         => 'pending_at',
+                'revisi'          => 'revisi_at',
+                'reject'          => 'reject_at',
+                'dalam_realisasi' => 'realisasi_at',
+                'completed'       => 'completed_at',
+            ];
+
+            if (isset($map[$activity->status])) {
+                $activity->{$map[$activity->status]} = now();
+            }
+        });
+    }
 
     /**
      * Relasi ke user pengaju aktivitas

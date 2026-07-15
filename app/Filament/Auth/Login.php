@@ -10,6 +10,9 @@ use Filament\Schemas\Components\Component;
 
 class Login extends BaseLogin
 {
+    // PERBAIKAN: Kata 'static' dihapus agar tidak bentrok dengan kelas induk Filament
+    protected string $view = 'filament.pages.auth.login';
+
     protected function getEmailFormComponent(): Component
     {
         return TextInput::make('username')

@@ -8,7 +8,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Auth;
 
 class ActivityForm
 {
@@ -28,9 +27,9 @@ class ActivityForm
                     ->visibility('public')
                     ->preserveFilenames()
                     ->multiple()
-                    ->reorderable()
-                    ->appendFiles()
-                    ->maxSize(2048),
+                    ->maxSize(2048)
+                    ->openable()
+                    ->downloadable(),
 
                 Textarea::make('description')
                     ->label('Deskripsi Kegiatan')
@@ -49,44 +48,6 @@ class ActivityForm
                     ->required()
                     ->searchable()
                     ->preload(),
-
-                // Select::make('status')
-                //     ->label('Status Persetujuan')
-                //     ->options([
-                //         'revisi' => 'Revisi',
-                //         'accept' => 'Disetujui',
-                //         'reject' => 'Ditolak',
-                //     ])
-                //     ->default('draft')
-                //     ->live()
-                //     ->visible(
-                //         fn () => Auth::user()->hasRole([
-                //             'kaprodi',
-                //             'super_admin',
-                //         ])
-                //     ),
-
-                // Textarea::make('catatan_revisi')
-                //     ->label('Catatan Revisi / Penolakan dari Kaprodi')
-                //     ->required(
-                //         fn ($get) => in_array(
-                //             $get('status'),
-                //             ['revisi', 'reject']
-                //         )
-                //     )
-                //     ->visible(
-                //         fn ($get) => in_array(
-                //             $get('status'),
-                //             ['revisi', 'reject']
-                //         )
-                //     )
-                //     ->disabled(
-                //         fn () => ! Auth::user()->hasRole([
-                //             'kaprodi',
-                //             'super_admin',
-                //         ])
-                //     )
-                //     ->columnSpanFull(),
             ]);
     }
 }

@@ -41,12 +41,28 @@ class UsersTable
                     ->label('Program Studi')
                     ->searchable()
                     ->sortable()
+                    // PERBAIKAN: Hanya aktifkan badge jika data relasi studyProgram tidak kosong
+                    ->badge(fn ($record) => !empty($record->studyProgram?->codename))
+                    ->color('success')
                     ->placeholder('-'),
 
                 TextColumn::make('unit.codename')
                     ->label('Unit')
                     ->searchable()
                     ->sortable()
+                    ->getStateUsing(function ($record) {
+                        $value = $record->unit?->codename;
+                        if (!$value) return '-';
+                        
+                        if (strlen($value) <= 5) return strtoupper($value);
+                        
+                        return collect(explode(' ', $value))
+                            ->map(fn ($word) => str($word)->substr(0, 1)->upper())
+                            ->implode('');
+                    })
+                    // PERBAIKAN: Hanya aktifkan badge jika data relasi unit tidak kosong
+                    ->badge(fn ($record) => !empty($record->unit?->codename))
+                    ->color('info')
                     ->placeholder('-'),
             ])
             ->filters([
@@ -55,9 +71,9 @@ class UsersTable
             ->recordActions([
                 ViewAction::make()
                     ->label('Detail'),
-
                 EditAction::make()
-                    ->label('Ubah'),
+                    ->label('Ubah')
+                    ->color('warning'),
             ])
             ->toolbarActions([
                 //

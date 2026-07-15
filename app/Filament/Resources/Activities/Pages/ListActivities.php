@@ -5,8 +5,7 @@ namespace App\Filament\Resources\Activities\Pages;
 use App\Filament\Resources\Activities\ActivityResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Resources\Components\Tab;
-use Filament\Schemas\Components\Tabs\Tab as TabsTab;
+use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListActivities extends ListRecords
@@ -24,24 +23,50 @@ class ListActivities extends ListRecords
     public function getTabs(): array
     {
         return [
-            'semua' => TabsTab::make('Semua'),
+            'semua' => Tab::make('Semua')
+                ->label('Semua')
+                ->badge(static::getResource()::getEloquentQuery()->count()),
 
-            'pending' => TabsTab::make('Menunggu Persetujuan')
+            'pending' => Tab::make('Menunggu Persetujuan')
+                ->label('Menunggu Persetujuan')
                 ->icon('heroicon-o-clock')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'pending')),
+                ->badge(
+                    static::getResource()::getEloquentQuery()
+                        ->where('status', 'pending')
+                        ->whereNull('realization_file')
+                        ->count()
+                )
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'pending')->whereNull('realization_file')),
 
-            'reject' => TabsTab::make('Ditolak')
+            'reject' => Tab::make('Ditolak')
+                ->label('Ditolak')
                 ->icon('heroicon-o-x-circle')
+                ->badge(
+                    static::getResource()::getEloquentQuery()
+                        ->where('status', 'reject')
+                        ->count()
+                )
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'reject')),
 
-            'realisasi' => TabsTab::make('Dalam Realisasi')
-                ->icon('heroicon-o-clock')
+            'dalam_realisasi' => Tab::make('Dalam Realisasi')
+                ->label('Dalam Realisasi')
+                ->icon('heroicon-o-arrow-path')
+                ->badge(
+                    static::getResource()::getEloquentQuery()
+                        ->where('status', 'dalam_realisasi')
+                        ->count()
+                )
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'dalam_realisasi')),
 
-            'complated' => TabsTab::make('Selesai Realisasi')
-                ->icon('heroicon-o-check-badge')
+            'completed' => Tab::make('Selesai Realisasi')
+                ->label('Selesai Realisasi')
+                ->icon('heroicon-o-check-circle')
+                ->badge(
+                    static::getResource()::getEloquentQuery()
+                        ->where('status', 'completed')
+                        ->count()
+                )
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'completed')),
-
         ];
     }
 }

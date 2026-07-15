@@ -28,6 +28,10 @@ class GeneralSettings extends Settings
 
     public ?string $button_color;
 
+    public ?string $nav_color;
+
+    public string $login_bg_color;
+
     public static function group(): string
     {
         return 'general';

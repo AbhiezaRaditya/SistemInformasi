@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\Activities;
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\Activities\Pages\CreateActivity;
 use App\Filament\Resources\Activities\Pages\EditActivity;
 use App\Filament\Resources\Activities\Pages\ListActivities;
@@ -13,20 +11,22 @@ use App\Filament\Resources\Activities\Schemas\ActivityInfolist;
 use App\Filament\Resources\Activities\Tables\ActivitiesTable;
 use App\Models\Activity;
 use BackedEnum;
-use Filament\Actions\Action as ActionsAction;
-use Filament\Actions\EditAction as ActionsEditAction;
-use Filament\Actions\ViewAction as ActionsViewAction;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\Action;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Section; // HANYA gunakan impor ini
-use Filament\Schemas\Components\Section as ComponentsSection;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 
 class ActivityResource extends Resource
@@ -53,35 +53,78 @@ class ActivityResource extends Resource
     {
         return ActivitiesTable::configure($table)
             ->actions([
-                ActionsViewAction::make(),
+                // 1. Tombol Detail — diubah jadi warna gray (netral),
+                //    dulu ikut 'warning' + class 'custom-edit-btn' sehingga sama kuning persis dengan tombol Edit
+                ViewAction::make()
+                    ->label('Detail')
+                    ->color('gray'),
 
-                // TOMBOL EDIT PINTAR
-                ActionsEditAction::make()
+                // 2. Tombol Edit — teks kuning saja (warning), TANPA blok/background solid
+                EditAction::make()
+                    ->label('Edit')
+                    ->color('warning')
+                    ->link()
                     ->visible(function ($record) {
-                        if (Auth::user()->hasRole('kaprodi')) return false;
+                        $user = Auth::user();
+                        
+                        if ($user->hasRole('kaprodi')) return false;
+                        if ($user->hasRole('super_admin')) return true;
+                        
                         if ($record->status === 'draft') return true;
                         if ($record->status === 'revisi' && empty($record->realization_file)) return true;
+                        if ($record->status === 'revisi' && filled($record->realization_file)) return false;
+                        
                         return false;
                     }),
 
-              
+                // 3. Tombol Hapus — TIDAK pakai class custom-cancel-btn lagi.
+                //    Class itu didesain untuk tombol "Batal" di halaman FORM (background putih + border),
+                //    bukan untuk tombol tabel. Dulu dipakai ulang di sini sehingga style-nya ketuker.
+                DeleteAction::make()
+                    ->label('Hapus')
+                    ->color('danger')
+                    ->link()
+                    ->visible(function ($record) {
+                        $user = Auth::user();
+                        if ($record->status !== 'draft') return false;
+                        if ($user->hasRole('super_admin')) return true;
+                        if ($record->user_id === $user->id) return true;
+                        return false;
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Hapus Aktivitas')
+                    ->modalDescription('Apakah kamu yakin ingin menghapus aktivitas ini? Tindakan ini tidak dapat dibatalkan.')
+                    ->modalSubmitActionLabel('Ya, Hapus'),
 
-                // TOMBOL REVIEW (KAPRODI)
-                ActionsAction::make('approval')
-                    ->label('Review')
+                // 4. Tombol Tinjauan (Kaprodi) — TIDAK pakai class custom-edit-btn lagi (alasan sama seperti Edit)
+                Action::make('approval')
+                    ->label('Tinjauan')
                     ->color('warning')
                     ->icon('heroicon-o-check-circle')
-                    ->visible(fn ($record) => $record->status === 'pending' && Auth::user()->hasRole(['kaprodi', 'super_admin']))
+                    ->link()
+                    ->visible(function ($record) {
+                        return $record->status === 'pending' 
+                            && Auth::user()->hasRole(['kaprodi', 'super_admin']);
+                    })
                     ->form([
                         Select::make('status')
                             ->label('Keputusan')
                             ->options(function ($record) {
                                 if (empty($record->realization_file)) {
-                                    return ['revisi' => 'Revisi Proposal', 'accept' => 'Setujui Proposal', 'reject' => 'Tolak Proposal'];
+                                    return [
+                                        'revisi' => 'Revisi Proposal', 
+                                        'accept' => 'Setujui Proposal', 
+                                        'reject' => 'Tolak Proposal'
+                                    ];
                                 }
-                                return ['revisi' => 'Revisi Dokumen', 'completed' => 'Setujui & Selesaikan', 'reject' => 'Tolak Dokumen'];
+                                return [
+                                    'revisi' => 'Revisi Dokumen', 
+                                    'completed' => 'Setujui & Selesaikan', 
+                                    'reject' => 'Tolak Dokumen'
+                                ];
                             })
-                            ->required()->live(),
+                            ->required()
+                            ->live(),
                         Textarea::make('catatan_revisi')
                             ->label('Catatan Review')
                             ->required(fn ($get) => in_array($get('status'), ['revisi', 'reject']))
@@ -89,22 +132,51 @@ class ActivityResource extends Resource
                     ])
                     ->action(function (array $data, $record): void {
                         $newStatus = $data['status'];
-                        if ($newStatus === 'accept') $newStatus = 'dalam_realisasi';
-                        
+                        if ($newStatus === 'accept') {
+                            $newStatus = 'dalam_realisasi';
+                        }
+
                         $record->update([
                             'status' => $newStatus,
                             'catatan_revisi' => $data['catatan_revisi'] ?? null,
                         ]);
-                    }),
 
-                // TOMBOL LAMPIRKAN (MAHASISWA)
-                ActionsAction::make('lampirkan_realisasi')
+                        $statusLabel = match ($newStatus) {
+                            'revisi' => 'Revisi',
+                            'dalam_realisasi' => 'Dalam Realisasi',
+                            'reject' => 'Ditolak',
+                            'completed' => 'Selesai Realisasi',
+                            default => ucfirst(str_replace('_', ' ', $newStatus)),
+                        };
+
+                        Notification::make()
+                            ->title('Tinjauan berhasil ditambahkan')
+                            ->body("Status: {$statusLabel}")
+                            ->success()
+                            ->send();
+                    })
+                    ->successNotification(null),
+
+                // 5. Tombol Lampirkan — TIDAK pakai class custom-submit-btn lagi.
+                //    Class itu didesain untuk tombol "Kirim ke Kaprodi" di halaman FORM,
+                //    bukan untuk tombol tabel.
+                Action::make('lampirkan_realisasi')
                     ->label('Lampirkan')
                     ->color('success')
                     ->icon('heroicon-o-paper-clip')
-                    ->visible(fn ($record) => in_array($record->status, ['dalam_realisasi', 'revisi']) && !Auth::user()->hasRole('kaprodi'))
+                    ->link()
+                    ->visible(function ($record) {
+                        $user = Auth::user();
+                        
+                        if ($user->hasRole('kaprodi')) return false;
+
+                        if ($record->status === 'dalam_realisasi') return true;
+                        if ($record->status === 'revisi' && filled($record->realization_file)) return true;
+
+                        return false;
+                    })
                     ->form([
-                        ComponentsSection::make('Instruksi Revisi') // Section yang benar
+                        Section::make('Instruksi Revisi')
                             ->visible(fn ($record) => filled($record->catatan_revisi))
                             ->schema([
                                 Placeholder::make('catatan')
@@ -113,7 +185,10 @@ class ActivityResource extends Resource
                             ]),
                         FileUpload::make('realization_file')
                             ->label('Unggah Dokumen Realisasi')
+                            ->disk('public')
                             ->directory('realisasi')
+                            ->visibility('public')
+                            ->preserveFilenames()
                             ->multiple()
                             ->default(fn ($record) => $record->realization_file)
                             ->required(),
@@ -121,10 +196,15 @@ class ActivityResource extends Resource
                     ->action(function (array $data, $record): void {
                         $record->update([
                             'realization_file' => $data['realization_file'],
-                            'status' => 'pending', 
+                            'status' => 'pending',
                         ]);
-                    })
 
+                        Notification::make()
+                            ->title('Lampiran berhasil ditambahkan')
+                            ->success()
+                            ->send();
+                    })
+                    ->successNotification(null),
             ]);
     }
 
@@ -142,7 +222,10 @@ class ActivityResource extends Resource
     {
         $query = parent::getEloquentQuery();
         $user = Auth::user();
-        if ($user->hasRole('super_admin')) return $query;
+        
+        if ($user->hasRole('super_admin')) {
+            return $query;
+        }
 
         if ($user->hasRole('kaprodi')) {
             return $query->where(function (Builder $q) use ($user) {
@@ -151,6 +234,7 @@ class ActivityResource extends Resource
                   ->orWhere('user_id', $user->id);
             });
         }
+        
         return $query->where('user_id', $user->id);
     }
 }

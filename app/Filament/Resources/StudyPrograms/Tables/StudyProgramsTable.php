@@ -17,12 +17,10 @@ class StudyProgramsTable
                 TextColumn::make('no')
                     ->label('No')
                     ->rowIndex(),
-
                 TextColumn::make('name')
                     ->label('Program Studi')
                     ->searchable()
                     ->sortable(),
-
                 TextColumn::make('codename')
                     ->label('Kode Prodi')
                     ->searchable()
@@ -34,9 +32,9 @@ class StudyProgramsTable
             ->recordActions([
                 ViewAction::make()
                     ->label('Detail'),
-
                 EditAction::make()
-                    ->label('Ubah'),
+                    ->label('Ubah')
+                    ->color('warning'),
             ]);
     }
 }

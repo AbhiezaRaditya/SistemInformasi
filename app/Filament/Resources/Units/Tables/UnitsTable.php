@@ -17,15 +17,17 @@ class UnitsTable
                 TextColumn::make('no')
                     ->label('No')
                     ->rowIndex(),
-
                 TextColumn::make('name')
                     ->label('Unit')
                     ->searchable(),
-
                 TextColumn::make('studyProgram.codename')
                     ->label('Kode Unit')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->default('-')
+                
+                    ->badge(fn ($record) => !empty($record->studyProgram?->codename))
+                    ->color('info'),
             ])
             ->filters([
                 TrashedFilter::make(),
@@ -33,9 +35,9 @@ class UnitsTable
             ->recordActions([
                 ViewAction::make()
                     ->label('Detail'),
-
                 EditAction::make()
-                    ->label('Ubah'),
+                    ->label('Ubah')
+                    ->color('warning'),
             ]);
     }
 }

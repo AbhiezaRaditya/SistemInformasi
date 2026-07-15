@@ -8,9 +8,16 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class StatsOverview extends BaseWidget
 {
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 1;
 
     protected int | string | array $columnSpan = 'full';
+
+    protected int | array | null $columns = [
+        'default' => 2, // Tampilan mobile otomatis membagi 2 block per baris
+        'sm' => 2,
+        'md' => 3,
+        'lg' => 3,
+    ];
 
     public static function canView(): bool
     {
