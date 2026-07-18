@@ -59,7 +59,7 @@ class ActivitiesTable
                     ->formatStateUsing(fn($state) => match ($state) {
                         'draft' => 'Draft',
                         'pending' => 'Pending',
-                        'revisi' => 'Revisi', // FIX: sebelumnya tidak ada, sehingga tampil "revisi" apa adanya
+                        'revisi' => 'Revisi', 
                         'reject' => 'Ditolak',
                         'dalam_realisasi' => 'Dalam Realisasi',
                         'completed' => 'Selesai',

@@ -58,15 +58,15 @@ class ListActivities extends ListRecords
                 )
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'dalam_realisasi')),
 
-            'completed' => Tab::make('Selesai Realisasi')
-                ->label('Selesai Realisasi')
-                ->icon('heroicon-o-check-circle')
-                ->badge(
-                    static::getResource()::getEloquentQuery()
-                        ->where('status', 'completed')
-                        ->count()
-                )
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'completed')),
+            // 'completed' => Tab::make('Selesai Realisasi')
+            //     ->label('Selesai Realisasi')
+            //     ->icon('heroicon-o-check-circle')
+            //     ->badge(
+            //         static::getResource()::getEloquentQuery()
+            //             ->where('status', 'completed')
+            //             ->count()
+            //     )
+            //     ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'completed')),
         ];
     }
 }
