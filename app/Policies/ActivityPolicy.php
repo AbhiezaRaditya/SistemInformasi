@@ -72,19 +72,4 @@ class ActivityPolicy
         return $authUser->can('Reorder:Activity');
     }
 
-    public function revisi(AuthUser $authUser, Activity $activity): bool
-    {
-        return $authUser->can('Revisi:Activity');
-    }
-
-    public function accept(AuthUser $authUser, Activity $activity): bool
-    {
-        return $authUser->can('Accept:Activity');
-    }
-
-    public function reject(AuthUser $authUser, Activity $activity): bool
-    {
-        return $authUser->can('Reject:Activity');
-    }
-
 }

@@ -3,13 +3,10 @@
 namespace App\Filament\Resources\ActivityHistories\Tables;
 
 use Filament\Actions\DeleteAction as ActionsDeleteAction;
-use Filament\Actions\DeleteBulkAction as ActionsDeleteBulkAction;
 use Filament\Actions\ViewAction as ActionsViewAction;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
+use Illuminate\Support\Facades\Auth;
 
 class ActivityHistoriesTable
 {
@@ -17,6 +14,10 @@ class ActivityHistoriesTable
     {
         return $table
             ->columns([
+                TextColumn::make('index')
+                    ->label('No')
+                    ->rowIndex(),
+
                 TextColumn::make('pengurus_unit.name')
                     ->label('Nama Pengurus')
                     ->sortable()
@@ -46,17 +47,23 @@ class ActivityHistoriesTable
                     ->badge()
                     ->colors([
                         'success' => 'completed',
-                        'warning' => 'pending',
                         'danger'  => 'reject',
-                        'info'    => 'dalam_realisasi',
-                    ]),
+                    ])
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'completed' => 'Selesai',
+                        'reject'    => 'Ditolak',
+                        default     => $state,
+                    }),
             ])
             ->actions([
-                ActionsViewAction::make()->color('gray'), 
-                ActionsDeleteAction::make()->color('danger'),
-            ])
-            ->bulkActions([
-                ActionsDeleteBulkAction::make(),
+                ActionsViewAction::make()
+                    ->label('Detail')
+                    ->color('gray'),
+
+                ActionsDeleteAction::make()
+                    ->label('Hapus')
+                    ->color('danger')
+                    ->visible(fn (): bool => Auth::user()?->hasRole('super_admin') ?? false),
             ]);
     }
 }

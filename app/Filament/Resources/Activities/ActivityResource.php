@@ -11,6 +11,7 @@ use App\Filament\Resources\Activities\Schemas\ActivityInfolist;
 use App\Filament\Resources\Activities\Tables\ActivitiesTable;
 use App\Models\Activity;
 use BackedEnum;
+use UnitEnum;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -33,6 +34,9 @@ class ActivityResource extends Resource
 {
     protected static ?string $model = Activity::class;
 
+
+protected static string|UnitEnum|null $navigationGroup = 'Aktivitas';
+
     protected static ?string $navigationLabel = 'Aktivitas Kemahasiswaan';
     protected static ?string $modelLabel = 'Aktivitas Kemahasiswaan';
     protected static ?string $pluralModelLabel = 'Aktivitas Kemahasiswaan';
@@ -53,13 +57,10 @@ class ActivityResource extends Resource
     {
         return ActivitiesTable::configure($table)
             ->actions([
-                // 1. Tombol Detail — diubah jadi warna gray (netral),
-                //    dulu ikut 'warning' + class 'custom-edit-btn' sehingga sama kuning persis dengan tombol Edit
                 ViewAction::make()
                     ->label('Detail')
                     ->color('gray'),
 
-                // 2. Tombol Edit — teks kuning saja (warning), TANPA blok/background solid
                 EditAction::make()
                     ->label('Edit')
                     ->color('warning')
@@ -77,9 +78,6 @@ class ActivityResource extends Resource
                         return false;
                     }),
 
-                // 3. Tombol Hapus — TIDAK pakai class custom-cancel-btn lagi.
-                //    Class itu didesain untuk tombol "Batal" di halaman FORM (background putih + border),
-                //    bukan untuk tombol tabel. Dulu dipakai ulang di sini sehingga style-nya ketuker.
                 DeleteAction::make()
                     ->label('Hapus')
                     ->color('danger')
@@ -96,7 +94,6 @@ class ActivityResource extends Resource
                     ->modalDescription('Apakah kamu yakin ingin menghapus aktivitas ini? Tindakan ini tidak dapat dibatalkan.')
                     ->modalSubmitActionLabel('Ya, Hapus'),
 
-                // 4. Tombol Tinjauan (Kaprodi) — TIDAK pakai class custom-edit-btn lagi (alasan sama seperti Edit)
                 Action::make('approval')
                     ->label('Tinjauan')
                     ->color('warning')
@@ -157,9 +154,6 @@ class ActivityResource extends Resource
                     })
                     ->successNotification(null),
 
-                // 5. Tombol Lampirkan — TIDAK pakai class custom-submit-btn lagi.
-                //    Class itu didesain untuk tombol "Kirim ke Kaprodi" di halaman FORM,
-                //    bukan untuk tombol tabel.
                 Action::make('lampirkan_realisasi')
                     ->label('Lampirkan')
                     ->color('success')

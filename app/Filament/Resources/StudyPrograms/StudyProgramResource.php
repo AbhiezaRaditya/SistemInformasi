@@ -11,6 +11,7 @@ use App\Filament\Resources\StudyPrograms\Schemas\StudyProgramInfolist;
 use App\Filament\Resources\StudyPrograms\Tables\StudyProgramsTable;
 use App\Models\StudyProgram;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -22,11 +23,13 @@ class StudyProgramResource extends Resource
 {
     protected static ?string $model = StudyProgram::class;
 
+    protected static string|UnitEnum|null $navigationGroup = 'Manajemen Klasifikasi';
+
     protected static ?string $navigationLabel = 'Program Studi';
     protected static ?string $modelLabel = 'Program Studi';
     protected static ?string $pluralModelLabel = 'Program Studi';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-book-open';
 
     public static function form(Schema $schema): Schema
     {

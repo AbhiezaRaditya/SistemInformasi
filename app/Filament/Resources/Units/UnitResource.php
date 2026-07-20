@@ -10,6 +10,7 @@ use App\Filament\Resources\Units\Schemas\UnitForm;
 use App\Filament\Resources\Units\Schemas\UnitInfolist;
 use App\Filament\Resources\Units\Tables\UnitsTable;
 use App\Models\Unit;
+use UnitEnum;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -21,12 +22,13 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class UnitResource extends Resource
 {
     protected static ?string $model = Unit::class;
+    protected static string|UnitEnum|null $navigationGroup = 'Manajemen Klasifikasi';
 
     protected static ?string $navigationLabel = 'Unit';
     protected static ?string $modelLabel = 'Unit';
     protected static ?string $pluralModelLabel = 'Unit';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user-group';
 
     public static function form(Schema $schema): Schema
     {

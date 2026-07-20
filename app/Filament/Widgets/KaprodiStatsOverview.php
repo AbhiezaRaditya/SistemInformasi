@@ -33,12 +33,12 @@ class KaprodiStatsOverview extends BaseWidget
             ->pluck('id');
 
         return [
-            $this->makeStat('Pending', 'pending', 'warning', $unitIds, 'pending'),
-            $this->makeStat('Revisi', 'revisi', 'info', $unitIds, 'revisi'),
-            $this->makeStat('Ditolak', 'reject', 'danger', $unitIds, 'reject'),
-            // Ubah string 'dalam_realisasi' sesuai dengan isi kolom status di tabel activities Anda
-            $this->makeStat('Dalam Realisasi', 'dalam_realisasi', 'info', $unitIds, 'realisasi'),
-            $this->makeStat('Selesai', 'completed', 'success', $unitIds, 'completed'),
+            $this->makeStat('Pending', 'pending', 'warning', $unitIds, '/dashboard/activities?tab=pending'),
+            $this->makeStat('Revisi', 'revisi', 'info', $unitIds, '/dashboard/activities?tab=revisi'),
+            $this->makeStat('Ditolak', 'reject', 'danger', $unitIds, '/dashboard/activities?tab=reject'),
+            $this->makeStat('Dalam Realisasi', 'dalam_realisasi', 'info', $unitIds, '/dashboard/activities?tab=realisasi'),
+            // URL diarahkan ke halaman Riwayat Aktivitas
+            $this->makeStat('Selesai', 'completed', 'success', $unitIds, '/dashboard/activity-histories'),
         ];
     }
 
@@ -47,15 +47,13 @@ class KaprodiStatsOverview extends BaseWidget
         string $status,
         string $color,
         $unitIds,
-        ?string $tabKey = null
+        string $urlPath
     ): Stat {
         $total = Activity::whereIn('unit_id', $unitIds)
             ->where('status', $status)
             ->count();
 
-        $url = $tabKey
-            ? url('/dashboard/activities?tab=' . $tabKey)
-            : url('/dashboard/activities');
+        $url = url($urlPath);
 
         $lihatLink = '<a href="' . $url . '" style="display:inline-block; padding:2px 10px; border-radius:999px; background:#eff6ff; color:#2563eb; font-size:0.72rem; font-weight:600; text-decoration:none; border:1px solid #bfdbfe;">Lihat</a>';
 
