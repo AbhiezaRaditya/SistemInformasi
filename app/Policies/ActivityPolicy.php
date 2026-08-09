@@ -14,7 +14,8 @@ class ActivityPolicy
     
     public function viewAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ViewAny:Activity');
+        // Ubah mengecek 'View:Activity' sesuai checkbox yang ada di Roles
+        return $authUser->can('View:Activity') || $authUser->can('view_activity');
     }
 
     public function view(AuthUser $authUser, Activity $activity): bool
@@ -36,40 +37,4 @@ class ActivityPolicy
     {
         return $authUser->can('Delete:Activity');
     }
-
-    public function deleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('DeleteAny:Activity');
-    }
-
-    public function restore(AuthUser $authUser, Activity $activity): bool
-    {
-        return $authUser->can('Restore:Activity');
-    }
-
-    public function forceDelete(AuthUser $authUser, Activity $activity): bool
-    {
-        return $authUser->can('ForceDelete:Activity');
-    }
-
-    public function forceDeleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('ForceDeleteAny:Activity');
-    }
-
-    public function restoreAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('RestoreAny:Activity');
-    }
-
-    public function replicate(AuthUser $authUser, Activity $activity): bool
-    {
-        return $authUser->can('Replicate:Activity');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:Activity');
-    }
-
 }

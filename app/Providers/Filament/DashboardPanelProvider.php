@@ -9,7 +9,6 @@ use App\Filament\Widgets\ActivityCategoryChart;
 use App\Filament\Widgets\CustomAccountWidget;
 use App\Filament\Widgets\KaprodiStatsOverview;
 use App\Filament\Widgets\StatsOverview;
-use App\Filament\Widgets\UserVerificationTable;
 use App\Settings\GeneralSettings;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -264,7 +263,7 @@ class DashboardPanelProvider extends PanelProvider
                         /* ========================================================================== */
 
                         /* 1. Reset total: matikan semua background/shadow bawaan di elemen pembungkus,
-                           supaya hanya satu elemen (button/anchor) yang benar-benar menampilkan warna */
+                            supaya hanya satu elemen (button/anchor) yang benar-benar menampilkan warna */
                         .fi-sidebar .fi-sidebar-item,
                         .fi-sidebar .fi-sidebar-item:hover,
                         .fi-sidebar .fi-sidebar-item:focus,
@@ -294,7 +293,7 @@ class DashboardPanelProvider extends PanelProvider
                         }
 
                         /* 3. Active (menu yang sedang dibuka): satu warna solid + border-left aksen,
-                           digabung dalam satu blok saja supaya tidak tumpang tindih dengan blok lain */
+                            digabung dalam satu blok saja supaya tidak tumpang tindih dengan blok lain */
                         .fi-sidebar .fi-sidebar-item.fi-active .fi-sidebar-item-btn,
                         .fi-sidebar .fi-sidebar-item.fi-active > a,
                         .fi-sidebar .fi-sidebar-item:has(> .fi-active) .fi-sidebar-item-btn,
@@ -318,8 +317,8 @@ class DashboardPanelProvider extends PanelProvider
                         }
 
                         /* 4. Matikan background/shadow bawaan di wrapper icon (svg) supaya tidak ada
-                           lingkaran/kotak tambahan menumpuk di atas highlight tombol.
-                           Ditarget langsung ke tag svg sesuai struktur DOM Filament asli. */
+                            lingkaran/kotak tambahan menumpuk di atas highlight tombol.
+                            Ditarget langsung ke tag svg sesuai struktur DOM Filament asli. */
                         .fi-sidebar svg.fi-sidebar-item-icon,
                         .fi-sidebar .fi-sidebar-item-btn svg.fi-sidebar-item-icon,
                         .fi-sidebar .fi-sidebar-item:hover svg.fi-sidebar-item-icon,
@@ -523,7 +522,6 @@ class DashboardPanelProvider extends PanelProvider
                             box-shadow: 0 4px 12px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04) !important;
                         }
 
-                      
                         html body .fi-main-ctn .fi-btn.fi-color-primary,
                         html body .fi-main-ctn .fi-ac-action-button.fi-color-primary,
                         html body .fi-main-ctn .fi-ac-btn-action.fi-color-primary,
@@ -916,7 +914,6 @@ class DashboardPanelProvider extends PanelProvider
                 StatsOverview::class,
                 KaprodiStatsOverview::class,
                 ActivityCategoryChart::class,
-                UserVerificationTable::class,
             ])
             ->middleware([
                 EncryptCookies::class,

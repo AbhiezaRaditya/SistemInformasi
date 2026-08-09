@@ -14,7 +14,7 @@ class StudyProgramPolicy
     
     public function viewAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ViewAny:StudyProgram');
+        return $authUser->can('View:StudyProgram') || $authUser->can('view_study_program');
     }
 
     public function view(AuthUser $authUser, StudyProgram $studyProgram): bool
@@ -36,40 +36,4 @@ class StudyProgramPolicy
     {
         return $authUser->can('Delete:StudyProgram');
     }
-
-    public function deleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('DeleteAny:StudyProgram');
-    }
-
-    public function restore(AuthUser $authUser, StudyProgram $studyProgram): bool
-    {
-        return $authUser->can('Restore:StudyProgram');
-    }
-
-    public function forceDelete(AuthUser $authUser, StudyProgram $studyProgram): bool
-    {
-        return $authUser->can('ForceDelete:StudyProgram');
-    }
-
-    public function forceDeleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('ForceDeleteAny:StudyProgram');
-    }
-
-    public function restoreAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('RestoreAny:StudyProgram');
-    }
-
-    public function replicate(AuthUser $authUser, StudyProgram $studyProgram): bool
-    {
-        return $authUser->can('Replicate:StudyProgram');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:StudyProgram');
-    }
-
 }

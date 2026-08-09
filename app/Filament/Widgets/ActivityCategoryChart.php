@@ -8,6 +8,7 @@ use App\Models\Unit;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Widgets\TableWidget;
+use Illuminate\Support\Facades\Auth;
 
 class ActivityCategoryChart extends TableWidget
 {
@@ -19,15 +20,22 @@ class ActivityCategoryChart extends TableWidget
 
     public static function canView(): bool
     {
-        return auth()->user()?->hasAnyRole([
-            'super_admin',
-            'kaprodi',
-        ]) ?? false;
+        $user = Auth::user();
+        if (!$user) return false;
+
+
+        // Cek izin secara fleksibel (mendukung spasi maupun underscore dari Filament Shield)
+        return $user->getAllPermissions()->contains(function ($p) {
+            $name = strtolower($p->name);
+            return (str_contains($name, 'aktivitas') || str_contains($name, 'activity'))
+                && (str_contains($name, 'kategori') || str_contains($name, 'category'));
+        });
     }
 
     protected function getTableDescription(): ?string
     {
-        $user = auth()->user();
+        $user = Auth::user();
+        if (!$user) return null;
 
         if ($user->hasRole('super_admin')) {
             return 'Total Aktivitas: ' . Activity::count();
@@ -43,7 +51,10 @@ class ActivityCategoryChart extends TableWidget
 
     public function table(Table $table): Table
     {
-        $user = auth()->user();
+        $user = Auth::user();
+        if (!$user) {
+            return $table->query(Category::query()->whereNull('id'))->columns([]);
+        }
 
         $columns = [
             TextColumn::make('name')
@@ -52,30 +63,22 @@ class ActivityCategoryChart extends TableWidget
         ];
 
         if ($user->hasRole('super_admin')) {
-
             $units = Unit::orderBy('codename')->get();
-
         } else {
-
             $units = Unit::where('study_program_id', $user->study_program_id)
                 ->orderBy('codename')
                 ->get();
-
         }
 
         foreach ($units as $unit) {
-
             $columns[] = TextColumn::make('unit_' . $unit->id)
                 ->label($unit->codename ?: $unit->name)
                 ->alignCenter()
                 ->state(function (Category $record) use ($unit) {
-
                     return Activity::where('category_id', $record->id)
                         ->where('unit_id', $unit->id)
                         ->count();
-
                 });
-
         }
 
         return $table

@@ -14,7 +14,7 @@ class CategoryPolicy
     
     public function viewAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ViewAny:Category');
+        return $authUser->can('View:Category') || $authUser->can('view_category');
     }
 
     public function view(AuthUser $authUser, Category $category): bool
@@ -36,40 +36,4 @@ class CategoryPolicy
     {
         return $authUser->can('Delete:Category');
     }
-
-    public function deleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('DeleteAny:Category');
-    }
-
-    public function restore(AuthUser $authUser, Category $category): bool
-    {
-        return $authUser->can('Restore:Category');
-    }
-
-    public function forceDelete(AuthUser $authUser, Category $category): bool
-    {
-        return $authUser->can('ForceDelete:Category');
-    }
-
-    public function forceDeleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('ForceDeleteAny:Category');
-    }
-
-    public function restoreAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('RestoreAny:Category');
-    }
-
-    public function replicate(AuthUser $authUser, Category $category): bool
-    {
-        return $authUser->can('Replicate:Category');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:Category');
-    }
-
 }

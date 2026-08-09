@@ -34,8 +34,7 @@ class ActivityResource extends Resource
 {
     protected static ?string $model = Activity::class;
 
-
-protected static string|UnitEnum|null $navigationGroup = 'Aktivitas';
+    protected static string|UnitEnum|null $navigationGroup = 'Aktivitas';
 
     protected static ?string $navigationLabel = 'Aktivitas Kemahasiswaan';
     protected static ?string $modelLabel = 'Aktivitas Kemahasiswaan';
@@ -68,12 +67,14 @@ protected static string|UnitEnum|null $navigationGroup = 'Aktivitas';
                     ->visible(function ($record) {
                         $user = Auth::user();
                         
-                        if ($user->hasRole('kaprodi')) return false;
-                        if ($user->hasRole('super_admin')) return true;
+                        // Super Admin / User tanpa batasan unit/prodi bisa edit kapan saja
+                        if (empty($user->study_program_id) && empty($user->unit_id)) return true;
                         
-                        if ($record->status === 'draft') return true;
-                        if ($record->status === 'revisi' && empty($record->realization_file)) return true;
-                        if ($record->status === 'revisi' && filled($record->realization_file)) return false;
+                        // Jika pemilik data dan status draft/revisi
+                        if ($record->user_id === $user->id) {
+                            if ($record->status === 'draft') return true;
+                            if ($record->status === 'revisi' && empty($record->realization_file)) return true;
+                        }
                         
                         return false;
                     }),
@@ -85,8 +86,13 @@ protected static string|UnitEnum|null $navigationGroup = 'Aktivitas';
                     ->visible(function ($record) {
                         $user = Auth::user();
                         if ($record->status !== 'draft') return false;
-                        if ($user->hasRole('super_admin')) return true;
+                        
+                        // Super Admin bisa hapus
+                        if (empty($user->study_program_id) && empty($user->unit_id)) return true;
+                        
+                        // Pemilik data bisa hapus saat draft
                         if ($record->user_id === $user->id) return true;
+                        
                         return false;
                     })
                     ->requiresConfirmation()
@@ -100,8 +106,10 @@ protected static string|UnitEnum|null $navigationGroup = 'Aktivitas';
                     ->icon('heroicon-o-check-circle')
                     ->link()
                     ->visible(function ($record) {
-                        return $record->status === 'pending' 
-                            && Auth::user()->hasRole(['kaprodi', 'super_admin']);
+                        $user = Auth::user();
+                        
+                        // Memeriksa status pending dan hak akses 'approve_activity' tunggal
+                        return $record->status === 'pending' && $user->can('approve_activity');
                     })
                     ->form([
                         Select::make('status')
@@ -162,7 +170,10 @@ protected static string|UnitEnum|null $navigationGroup = 'Aktivitas';
                     ->visible(function ($record) {
                         $user = Auth::user();
                         
-                        if ($user->hasRole('kaprodi')) return false;
+                        // Jika user adalah Kaprodi murni (Punya prodi tapi tidak punya unit spesifik), tidak boleh lampirkan
+                        if (!empty($user->study_program_id) && empty($user->unit_id) && empty($user->can('bypass_activity_rules'))) {
+                            return false;
+                        }
 
                         if ($record->status === 'dalam_realisasi') return true;
                         if ($record->status === 'revisi' && filled($record->realization_file)) return true;
@@ -217,16 +228,23 @@ protected static string|UnitEnum|null $navigationGroup = 'Aktivitas';
         $query = parent::getEloquentQuery();
         $user = Auth::user();
         
-        if ($user->hasRole('super_admin')) {
+        // 1. Jika Super Admin (Program Studi dan Unit kosong) -> Lihat Semua
+        if (empty($user->study_program_id) && empty($user->unit_id)) {
             return $query;
         }
 
-        if ($user->hasRole('kaprodi')) {
+        // 2. Jika Kaprodi (Program Studi terisi, Unit kosong) -> Lihat semua unit di bawah Prodi tersebut
+        if (!empty($user->study_program_id) && empty($user->unit_id)) {
             return $query->where(function (Builder $q) use ($user) {
                 $q->whereHas('unit', fn ($unitQuery) => $unitQuery->where('study_program_id', $user->study_program_id))
                   ->where('status', '!=', 'draft')
                   ->orWhere('user_id', $user->id);
             });
+        }
+        
+        // 3. Jika Himpunan / Unit (Unit terisi) -> Hanya lihat milik unit tersebut
+        if (!empty($user->unit_id)) {
+            return $query->where('unit_id', $user->unit_id);
         }
         
         return $query->where('user_id', $user->id);

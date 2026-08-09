@@ -20,9 +20,16 @@ class KaprodiStatsOverview extends BaseWidget
         'lg' => 3,
     ];
 
-    public static function canView(): bool
+   public static function canView(): bool
     {
-        return auth()->user()?->hasRole('kaprodi') ?? false;
+        $user = Auth::user();
+        if (!$user) return false;
+
+        return $user->getAllPermissions()->contains(function ($p) {
+            $name = strtolower($p->name);
+            // Harus mengandung kata 'kaprodi'
+            return str_contains($name, 'kaprodi');
+        });
     }
 
     protected function getStats(): array

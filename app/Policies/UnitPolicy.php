@@ -14,7 +14,7 @@ class UnitPolicy
     
     public function viewAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ViewAny:Unit');
+        return $authUser->can('View:Unit') || $authUser->can('view_unit');
     }
 
     public function view(AuthUser $authUser, Unit $unit): bool
@@ -36,40 +36,4 @@ class UnitPolicy
     {
         return $authUser->can('Delete:Unit');
     }
-
-    public function deleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('DeleteAny:Unit');
-    }
-
-    public function restore(AuthUser $authUser, Unit $unit): bool
-    {
-        return $authUser->can('Restore:Unit');
-    }
-
-    public function forceDelete(AuthUser $authUser, Unit $unit): bool
-    {
-        return $authUser->can('ForceDelete:Unit');
-    }
-
-    public function forceDeleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('ForceDeleteAny:Unit');
-    }
-
-    public function restoreAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('RestoreAny:Unit');
-    }
-
-    public function replicate(AuthUser $authUser, Unit $unit): bool
-    {
-        return $authUser->can('Replicate:Unit');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:Unit');
-    }
-
 }

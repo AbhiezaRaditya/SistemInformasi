@@ -76,35 +76,45 @@ class ActivitiesTable
                     }),
             ])
             ->filters([])
-            ->recordActions([
+            ->actions([
                 // Detail — selalu muncul
                 ViewAction::make()
                     ->label('Detail')
-                    ->color('gray'), // FIX: dulu tidak ada color(), sehingga fallback ke warna kuning (warning) dari tema/default
+                    ->color('gray'),
 
-                // Edit — super_admin kapan saja, himpunan saat draft/revisi
+                // Edit — Bypass kapan saja, Pemilik saat draft/revisi
                 EditAction::make()
                     ->label('Edit')
-                    ->color('info') // ditambahkan biar warna konsisten & tidak ikut default
+                    ->color('info')
                     ->visible(function ($record) {
                         $user = Auth::user();
-                        if ($user->hasRole('super_admin')) return true;
-                        if ($user->hasRole('himpunan')) {
+                        
+                        // Hak istimewa untuk melewati aturan
+                        if ($user->can('bypass_activity_rules')) return true;
+                        
+                        // Jika dia adalah pemilik data, dan statusnya draft/revisi
+                        if ($record->user_id === $user->id) {
                             return in_array($record->status, ['draft', 'revisi']);
                         }
+                        
                         return false;
                     }),
 
-                // Hapus — super_admin kapan saja, himpunan hanya saat draft
+                // Hapus — Bypass kapan saja, Pemilik hanya saat draft
                 DeleteAction::make()
                     ->label('Hapus')
-                    ->color('danger') // ditambahkan biar warna konsisten & tidak ikut default
+                    ->color('danger')
                     ->visible(function ($record) {
                         $user = Auth::user();
-                        if ($user->hasRole('super_admin')) return true;
-                        if ($user->hasRole('himpunan')) {
+                        
+                        // Hak istimewa untuk melewati aturan
+                        if ($user->can('bypass_activity_rules')) return true;
+                        
+                        // Jika dia adalah pemilik data, dan statusnya masih draft
+                        if ($record->user_id === $user->id) {
                             return $record->status === 'draft';
                         }
+                        
                         return false;
                     })
                     ->requiresConfirmation()

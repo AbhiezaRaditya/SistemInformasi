@@ -23,10 +23,28 @@ class ManageGeneralSettings extends SettingsPage
     protected static string $settings = GeneralSettings::class;
     protected static ?string $navigationLabel = 'Pengaturan';
 
-    public static function canAccess(): bool
+   public static function canAccess(): bool
     {
+        /** @var \App\Models\User|null $user */
         $user = auth()->user();
-        return $user && method_exists($user, 'hasAnyRole') && $user->hasAnyRole(['super_admin', 'admin']);
+
+        if (!$user) {
+            return false;
+        }
+
+        // 1. Jika Super Admin / Admin, langsung izinkan
+        if ($user->hasAnyRole(['super_admin', 'admin'])) {
+            return true;
+        }
+
+        // 2. Cek apakah user memiliki permission apa pun yang mengandung kata kunci pengaturan/setting
+        // Ini melewati masalah perbedaan string persis atau guard name yang tidak sinkron
+        return $user->getAllPermissions()->contains(function ($permission) {
+            $name = strtolower($permission->name);
+            return str_contains($name, 'setting') 
+                || str_contains($name, 'general') 
+                || str_contains($name, 'manage_general_settings');
+        });
     }
 
     public function form(Schema $schema): Schema
