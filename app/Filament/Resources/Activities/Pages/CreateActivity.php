@@ -24,7 +24,18 @@ class CreateActivity extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $unitId = Auth::user()->unit_id;
+        $user = Auth::user();
+
+        // Mendapatkan unit_id berdasarkan relasi unit (mendukung relasi many-to-many atau hasOne/belongsTo)
+        $unitId = null;
+
+        if (method_exists($user, 'units') && $user->units()->exists()) {
+            $unitId = $user->units()->first()->id;
+        } elseif (method_exists($user, 'unit') && $user->unit) {
+            $unitId = $user->unit->id;
+        } elseif (isset($user->unit_id)) {
+            $unitId = $user->unit_id;
+        }
 
         if (! $unitId) {
             Notification::make()
@@ -37,7 +48,7 @@ class CreateActivity extends CreateRecord
         }
 
         $data['status'] = $this->buttonStatus;
-        $data['user_id'] = Auth::id();
+        $data['user_id'] = $user->id;
         $data['unit_id'] = $unitId;
 
         return $data;

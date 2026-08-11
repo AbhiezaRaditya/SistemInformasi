@@ -66,16 +66,16 @@ class ActivityResource extends Resource
                     ->link()
                     ->visible(function ($record) {
                         $user = Auth::user();
-                        
+
                         // Super Admin / User tanpa batasan unit/prodi bisa edit kapan saja
-                        if (empty($user->study_program_id) && empty($user->unit_id)) return true;
-                        
+                        if ($user->studyPrograms()->doesntExist() && $user->units()->doesntExist()) return true;
+
                         // Jika pemilik data dan status draft/revisi
                         if ($record->user_id === $user->id) {
                             if ($record->status === 'draft') return true;
                             if ($record->status === 'revisi' && empty($record->realization_file)) return true;
                         }
-                        
+
                         return false;
                     }),
 
@@ -86,13 +86,13 @@ class ActivityResource extends Resource
                     ->visible(function ($record) {
                         $user = Auth::user();
                         if ($record->status !== 'draft') return false;
-                        
+
                         // Super Admin bisa hapus
-                        if (empty($user->study_program_id) && empty($user->unit_id)) return true;
-                        
+                        if ($user->studyPrograms()->doesntExist() && $user->units()->doesntExist()) return true;
+
                         // Pemilik data bisa hapus saat draft
                         if ($record->user_id === $user->id) return true;
-                        
+
                         return false;
                     })
                     ->requiresConfirmation()
@@ -107,9 +107,9 @@ class ActivityResource extends Resource
                     ->link()
                     ->visible(function ($record) {
                         $user = Auth::user();
-                        
-                        // Memeriksa status pending dan hak akses 'approve_activity' tunggal
-                        return $record->status === 'pending' && $user->can('approve_activity');
+
+                        // Memeriksa status pending dan hak akses 'Approve:Activity' (sesuai Shield)
+                        return $record->status === 'pending' && ($user->can('Approve:Activity') || $user->can('approve_activity'));
                     })
                     ->form([
                         Select::make('status')
@@ -117,14 +117,14 @@ class ActivityResource extends Resource
                             ->options(function ($record) {
                                 if (empty($record->realization_file)) {
                                     return [
-                                        'revisi' => 'Revisi Proposal', 
-                                        'accept' => 'Setujui Proposal', 
+                                        'revisi' => 'Revisi Proposal',
+                                        'accept' => 'Setujui Proposal',
                                         'reject' => 'Tolak Proposal'
                                     ];
                                 }
                                 return [
-                                    'revisi' => 'Revisi Dokumen', 
-                                    'completed' => 'Setujui & Selesaikan', 
+                                    'revisi' => 'Revisi Dokumen',
+                                    'completed' => 'Setujui & Selesaikan',
                                     'reject' => 'Tolak Dokumen'
                                 ];
                             })
@@ -169,9 +169,9 @@ class ActivityResource extends Resource
                     ->link()
                     ->visible(function ($record) {
                         $user = Auth::user();
-                        
-                        // Jika user adalah Kaprodi murni (Punya prodi tapi tidak punya unit spesifik), tidak boleh lampirkan
-                        if (!empty($user->study_program_id) && empty($user->unit_id) && empty($user->can('bypass_activity_rules'))) {
+
+                        // Jika user adalah Kaprodi murni (punya prodi tapi tidak punya unit spesifik), tidak boleh lampirkan
+                        if ($user->studyPrograms()->exists() && $user->units()->doesntExist() && empty($user->can('bypass_activity_rules'))) {
                             return false;
                         }
 
@@ -227,26 +227,57 @@ class ActivityResource extends Resource
     {
         $query = parent::getEloquentQuery();
         $user = Auth::user();
-        
-        // 1. Jika Super Admin (Program Studi dan Unit kosong) -> Lihat Semua
-        if (empty($user->study_program_id) && empty($user->unit_id)) {
+
+        if (!$user) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        // Cek apakah user memiliki hak akses view_any / viewAny
+        $hasViewAny = $user->can('ViewAny:Activity') || $user->can('view_any_activity') || $user->can('view_any_activities');
+
+        // Ambil daftar ID Program Studi & Unit milik user
+        $studyProgramIds = $user->studyPrograms()->pluck('study_programs.id');
+        $unitIds = $user->units()->pluck('units.id');
+
+        // 1. Jika Super Admin / User tingkat atas (tidak terikat ke prodi/unit)
+        if ($studyProgramIds->isEmpty() && $unitIds->isEmpty()) {
+            // Jika punya izin ViewAny, boleh lihat semua. Jika tidak, hanya miliknya sendiri.
+            if ($hasViewAny || $user->hasRole('super_admin')) {
+                return $query;
+            }
+            return $query->where('user_id', $user->id);
+        }
+
+        // 2. Jika Kaprodi (punya Program Studi, tapi tidak punya Unit)
+        if ($studyProgramIds->isNotEmpty() && $unitIds->isEmpty()) {
+            return $query->where(function (Builder $q) use ($user, $studyProgramIds, $hasViewAny) {
+                $unitQueryCheck = function ($unitQuery) use ($studyProgramIds) {
+                    $unitQuery->whereIn('study_program_id', $studyProgramIds);
+                };
+
+                if ($hasViewAny) {
+                    $q->whereHas('unit', $unitQueryCheck)
+                      ->where('status', '!=', 'draft')
+                      ->orWhere('user_id', $user->id);
+                } else {
+                    $q->whereHas('unit', $unitQueryCheck)
+                      ->where('user_id', $user->id);
+                }
+            });
+        }
+
+        // 3. Jika Himpunan / Unit (punya Unit)
+        if ($unitIds->isNotEmpty()) {
+            $query->whereIn('unit_id', $unitIds);
+
+            if (!$hasViewAny) {
+                $query->where('user_id', $user->id);
+            }
+
             return $query;
         }
 
-        // 2. Jika Kaprodi (Program Studi terisi, Unit kosong) -> Lihat semua unit di bawah Prodi tersebut
-        if (!empty($user->study_program_id) && empty($user->unit_id)) {
-            return $query->where(function (Builder $q) use ($user) {
-                $q->whereHas('unit', fn ($unitQuery) => $unitQuery->where('study_program_id', $user->study_program_id))
-                  ->where('status', '!=', 'draft')
-                  ->orWhere('user_id', $user->id);
-            });
-        }
-        
-        // 3. Jika Himpunan / Unit (Unit terisi) -> Hanya lihat milik unit tersebut
-        if (!empty($user->unit_id)) {
-            return $query->where('unit_id', $user->unit_id);
-        }
-        
+        // Default fallback: Hanya tampilkan data milik sendiri
         return $query->where('user_id', $user->id);
     }
 }

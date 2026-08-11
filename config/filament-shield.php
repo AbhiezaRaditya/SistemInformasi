@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Filament\Resources\Activities\ActivityResource;
+use App\Filament\Resources\ActivityHistories\ActivityHistoryResource;
+use App\Filament\Widgets\CustomAccountWidget;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Pages\Dashboard;
 use Filament\Widgets\AccountWidget;
@@ -47,7 +49,7 @@ return [
         'merge' => true,
         'generate' => true,
         'methods' => [
-            'view', 'create', 'update', 'delete', // DIPANGKAS: Hanya menyisakan 4 aksi utama yang bersih tanpa duplikasi 'any'
+            'view', 'create', 'update', 'delete',
         ],
         'single_parameter_methods' => [
             'view', 'create',
@@ -55,7 +57,7 @@ return [
     ],
 
     'localization' => [
-        'enabled' => false,
+        'enabled' => true,
         'key' => 'filament-shield::filament-shield.resource_permission_prefixes_labels',
     ],
 
@@ -63,9 +65,11 @@ return [
         'subject' => 'model',
         'manage' => [
             RoleResource::class => ['view', 'create', 'update', 'delete'],
-            ActivityResource::class => ['approve'] // DIGABUNG: Cukup 1 izin 'approve' untuk acc, revisi, dan reject sekaligus
+            ActivityResource::class => ['approve', 'viewAny'],
         ],
-        'exclude' => [],
+        'exclude' => [
+            ActivityHistoryResource::class,
+        ],
     ],
 
     'pages' => [
@@ -77,7 +81,11 @@ return [
     'widgets' => [
         'subject' => 'class',
         'prefix' => 'view',
-        'exclude' => [AccountWidget::class, FilamentInfoWidget::class],
+        'exclude' => [
+            AccountWidget::class,
+            FilamentInfoWidget::class,
+            CustomAccountWidget::class,
+        ],
     ],
 
     'custom_permissions' => [],

@@ -12,6 +12,18 @@ class ListActivities extends ListRecords
 {
     protected static string $resource = ActivityResource::class;
 
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        $tabFromUrl = request()->query('activeTab');
+
+        if (filled($tabFromUrl) && array_key_exists($tabFromUrl, $this->getTabs())) {
+            $this->activeTab = $tabFromUrl;
+        }
+    }
+
     protected function getHeaderActions(): array
     {
         return [

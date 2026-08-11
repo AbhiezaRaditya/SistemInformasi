@@ -4,7 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,11 +21,11 @@ class User extends Authenticatable implements HasName // <-- TAMBAHKAN IMPLEMENT
     use HasFactory, Notifiable, SoftDeletes, HasRoles;
 
     protected $fillable = [
-        'name', 
-        'password', 
+        'name',
+        'password',
         'username',
-        'study_program_id',
-        'unit_id'
+        // DIHAPUS: 'study_program_id' dan 'unit_id' sudah tidak ada di tabel users lagi
+        // (sekarang dikelola lewat relasi many-to-many studyPrograms() & units())
     ];
 
     /**
@@ -48,14 +48,18 @@ class User extends Authenticatable implements HasName // <-- TAMBAHKAN IMPLEMENT
         return $this->hasMany(Activity::class);
     }
 
-    public function studyProgram(): BelongsTo
+    // DIUBAH: dari belongsTo() jadi belongsToMany() karena sekarang 1 user bisa
+    // punya lebih dari 1 Program Studi.
+    public function studyPrograms(): BelongsToMany
     {
-        return $this->belongsTo(StudyProgram::class, 'study_program_id'); 
+        return $this->belongsToMany(StudyProgram::class, 'study_program_user');
     }
 
-    public function unit(): BelongsTo
+    // DIUBAH: dari belongsTo() jadi belongsToMany() karena sekarang 1 user bisa
+    // punya lebih dari 1 Unit.
+    public function units(): BelongsToMany
     {
-        return $this->belongsTo(Unit::class, 'unit_id'); 
+        return $this->belongsToMany(Unit::class, 'unit_user');
     }
 
     /**

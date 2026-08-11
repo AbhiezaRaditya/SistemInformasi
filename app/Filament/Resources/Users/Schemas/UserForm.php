@@ -29,15 +29,19 @@ class UserForm
                     ->preload()
                     ->searchable(),
 
-                Select::make('study_program_id')
+                // DIUBAH: dari 'study_program_id' (single) jadi 'studyPrograms' (multiple)
+                Select::make('studyPrograms')
                     ->label('Program Studi')
-                    ->relationship('studyProgram', 'codename')
+                    ->relationship('studyPrograms', 'codename')
+                    ->multiple()
                     ->searchable()
                     ->preload(),
 
-                Select::make('unit_id')
+                // DIUBAH: dari 'unit_id' (single) jadi 'units' (multiple)
+                Select::make('units')
                     ->label('Unit')
-                    ->relationship('unit', 'codename') // BERHASIL DIPERBAIKI: Menggunakan 'unit' huruf kecil agar sinkron dengan Model
+                    ->relationship('units', 'codename')
+                    ->multiple()
                     ->searchable()
                     ->preload(),
 
@@ -45,9 +49,7 @@ class UserForm
                     ->label('Password')
                     ->password()
                     ->revealable()
-                    // BERHASIL DIPERBAIKI: Wajib diisi HANYA saat membuat user baru. Saat edit boleh dikosongkan.
                     ->required(fn (string $operation): bool => $operation === 'create')
-                    // Mencegah password lama tertimpa kosong (null) jika kolom tidak diisi saat edit
                     ->dehydrated(fn ($state) => filled($state)),
             ]);
     }

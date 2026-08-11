@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 
 class StatsOverview extends BaseWidget
 {
+    protected ?string $heading = 'Jumlah Pengguna';
+
     protected static ?int $sort = 1;
 
     protected int | string | array $columnSpan = 'full';

@@ -37,31 +37,42 @@ class UsersTable
                         default => 'gray',
                     }),
 
-                TextColumn::make('studyProgram.codename')
+                // DIUBAH: dari 'studyProgram.codename' (singular) jadi relasi many-to-many
+                // 'studyPrograms' (plural). Filament otomatis menampilkan badge untuk
+                // setiap item saat relasinya to-many.
+                TextColumn::make('studyPrograms.codename')
                     ->label('Program Studi')
                     ->searchable()
                     ->sortable()
-                    // PERBAIKAN: Hanya aktifkan badge jika data relasi studyProgram tidak kosong
-                    ->badge(fn ($record) => !empty($record->studyProgram?->codename))
+                    ->badge()
                     ->color('success')
                     ->placeholder('-'),
 
-                TextColumn::make('unit.codename')
+                // DIUBAH: dari 'unit.codename' (singular) jadi 'units' (plural, many-to-many).
+                // Logic singkatan kamu tetap dipertahankan, tapi sekarang dijalankan
+                // per-item untuk setiap unit yang dimiliki user.
+                TextColumn::make('units.codename')
                     ->label('Unit')
                     ->searchable()
                     ->sortable()
                     ->getStateUsing(function ($record) {
-                        $value = $record->unit?->codename;
-                        if (!$value) return '-';
-                        
-                        if (strlen($value) <= 5) return strtoupper($value);
-                        
-                        return collect(explode(' ', $value))
-                            ->map(fn ($word) => str($word)->substr(0, 1)->upper())
-                            ->implode('');
+                        $codenames = $record->units->pluck('codename');
+
+                        if ($codenames->isEmpty()) {
+                            return null; // biar placeholder '-' yang muncul
+                        }
+
+                        return $codenames->map(function ($value) {
+                            if (strlen($value) <= 5) {
+                                return strtoupper($value);
+                            }
+
+                            return collect(explode(' ', $value))
+                                ->map(fn ($word) => str($word)->substr(0, 1)->upper())
+                                ->implode('');
+                        })->all();
                     })
-                    // PERBAIKAN: Hanya aktifkan badge jika data relasi unit tidak kosong
-                    ->badge(fn ($record) => !empty($record->unit?->codename))
+                    ->badge()
                     ->color('info')
                     ->placeholder('-'),
             ])

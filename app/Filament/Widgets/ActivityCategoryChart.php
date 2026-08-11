@@ -23,10 +23,9 @@ class ActivityCategoryChart extends TableWidget
         $user = Auth::user();
         if (!$user) return false;
 
-
         // Cek izin secara fleksibel (mendukung spasi maupun underscore dari Filament Shield)
         return $user->getAllPermissions()->contains(function ($p) {
-            $name = strtolower($p->name);
+            $name = strtolower($p->name ?? '');
             return (str_contains($name, 'aktivitas') || str_contains($name, 'activity'))
                 && (str_contains($name, 'kategori') || str_contains($name, 'category'));
         });
@@ -37,16 +36,26 @@ class ActivityCategoryChart extends TableWidget
         $user = Auth::user();
         if (!$user) return null;
 
-        if ($user->hasRole('super_admin')) {
+        $studyProgramIds = method_exists($user, 'studyPrograms') ? $user->studyPrograms()->pluck('study_programs.id') : collect();
+        $unitIds = method_exists($user, 'units') ? $user->units()->pluck('units.id') : collect();
+
+        // 1. Super Admin / User tanpa batasan
+        if ($studyProgramIds->isEmpty() && $unitIds->isEmpty()) {
             return 'Total Aktivitas: ' . Activity::count();
+        } 
+        // 2. Kaprodi (Punya Program Studi, tapi tidak punya Unit spesifik)
+        elseif ($studyProgramIds->isNotEmpty() && $unitIds->isEmpty()) {
+            $targetUnitIds = Unit::whereIn('study_program_id', $studyProgramIds)->pluck('id');
+            $total = Activity::whereIn('unit_id', $targetUnitIds)->count();
+            return 'Total Aktivitas Prodi: ' . $total;
+        } 
+        // 3. Himpunan / Unit (Punya Unit spesifik)
+        elseif ($unitIds->isNotEmpty()) {
+            $total = Activity::whereIn('unit_id', $unitIds)->count();
+            return 'Total Aktivitas Unit: ' . $total;
         }
 
-        $unitIds = Unit::where('study_program_id', $user->study_program_id)
-            ->pluck('id');
-
-        $total = Activity::whereIn('unit_id', $unitIds)->count();
-
-        return 'Total Aktivitas Prodi: ' . $total;
+        return 'Total Aktivitas: ' . Activity::where('user_id', $user->id)->count();
     }
 
     public function table(Table $table): Table
@@ -62,12 +71,22 @@ class ActivityCategoryChart extends TableWidget
                 ->weight('bold'),
         ];
 
-        if ($user->hasRole('super_admin')) {
+        $studyProgramIds = method_exists($user, 'studyPrograms') ? $user->studyPrograms()->pluck('study_programs.id') : collect();
+        $unitIds = method_exists($user, 'units') ? $user->units()->pluck('units.id') : collect();
+
+        // Menyesuaikan daftar unit berdasarkan hak akses relasi user
+        if ($studyProgramIds->isEmpty() && $unitIds->isEmpty()) {
             $units = Unit::orderBy('codename')->get();
-        } else {
-            $units = Unit::where('study_program_id', $user->study_program_id)
+        } elseif ($studyProgramIds->isNotEmpty() && $unitIds->isEmpty()) {
+            $units = Unit::whereIn('study_program_id', $studyProgramIds)
                 ->orderBy('codename')
                 ->get();
+        } elseif ($unitIds->isNotEmpty()) {
+            $units = Unit::whereIn('id', $unitIds)
+                ->orderBy('codename')
+                ->get();
+        } else {
+            $units = Unit::whereRaw('1 = 0')->get();
         }
 
         foreach ($units as $unit) {

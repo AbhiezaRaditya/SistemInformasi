@@ -39,17 +39,19 @@ class UserInfolist
                         TextEntry::make('username')
                             ->label('Username'),
 
-                        TextEntry::make('studyProgram.codename')
+                        // DIUBAH: dari 'studyProgram.codename' (singular) jadi
+                        // 'studyPrograms.codename' (plural, many-to-many). Filament
+                        // otomatis menampilkan badge untuk tiap item.
+                        TextEntry::make('studyPrograms.codename')
                             ->label('Program Studi')
-                            // PERBAIKAN: Hanya pasang badge jika data relasi prodi tidak kosong
-                            ->badge(fn ($record) => !empty($record->studyProgram?->codename))
+                            ->badge()
                             ->color('success')
                             ->placeholder('-'),
 
-                        TextEntry::make('unit.codename')
+                        // DIUBAH: dari 'unit.codename' (singular) jadi 'units.codename' (plural)
+                        TextEntry::make('units.codename')
                             ->label('Unit')
-                            // PERBAIKAN: Hanya pasang badge jika data relasi unit tidak kosong
-                            ->badge(fn ($record) => !empty($record->unit?->codename))
+                            ->badge()
                             ->color('info')
                             ->placeholder('-'),
                     ]),

@@ -21,9 +21,14 @@ class ManageGeneralSettings extends SettingsPage
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
     protected static string $settings = GeneralSettings::class;
-    protected static ?string $navigationLabel = 'Pengaturan';
+    
+    // Diubah menjadi "Pengaturan Halaman"
+    protected static ?string $navigationLabel = 'Pengaturan Halaman';
 
-   public static function canAccess(): bool
+    // Opsional: Mengubah judul halaman di header browser / halaman utama admin
+    protected static ?string $title = 'Pengaturan Halaman';
+
+    public static function canAccess(): bool
     {
         /** @var \App\Models\User|null $user */
         $user = auth()->user();
@@ -38,7 +43,6 @@ class ManageGeneralSettings extends SettingsPage
         }
 
         // 2. Cek apakah user memiliki permission apa pun yang mengandung kata kunci pengaturan/setting
-        // Ini melewati masalah perbedaan string persis atau guard name yang tidak sinkron
         return $user->getAllPermissions()->contains(function ($permission) {
             $name = strtolower($permission->name);
             return str_contains($name, 'setting') 
@@ -53,7 +57,7 @@ class ManageGeneralSettings extends SettingsPage
             ->columns(1)
             ->components([
 
-                // BARIS 1: INFORMASI UMUM (satu-satunya kartu yang perlu agak besar, karena ada upload logo)
+                // BARIS 1: INFORMASI UMUM
                 Section::make('Informasi Umum')
                     ->schema([
                         TextInput::make('site_name')
@@ -70,7 +74,7 @@ class ManageGeneralSettings extends SettingsPage
                     ])
                     ->columns(2),
 
-                // BARIS 2: WARNA — kartu-kartu kecil satuan, 4 per baris
+                // BARIS 2: WARNA & PENGATURAN LAINNYA
                 Grid::make(4)
                     ->schema([
                         Section::make('Sidebar (Atas)')
@@ -164,14 +168,14 @@ class ManageGeneralSettings extends SettingsPage
 
     public function getSaveFormAction(): Action
     {
-        return parent::getSaveFormAction()->label('Simpan Setting');
+        return parent::getSaveFormAction()->label('Simpan Pengaturan');
     }
 
     public function getSavedNotification(): ?Notification
     {
         return Notification::make()
             ->success()
-            ->title('Setting Web berhasil di ubah')
-            ->body('silahkan refresh');
+            ->title('Pengaturan Halaman berhasil diubah')
+            ->body('Silakan refresh halaman untuk melihat perubahan.');
     }
 }

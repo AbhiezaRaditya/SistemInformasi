@@ -16,6 +16,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class ActivityHistoryResource extends Resource
 {
@@ -64,53 +65,50 @@ class ActivityHistoryResource extends Resource
     }
 
     // ==========================================
-    // PENGUNCIAN MUTLAK DI LEVEL KODE (AMAN)
+    // PENGUNCIAN MUTLAK & SINKRONISASI SHIELD
     // ==========================================
-    
+
     public static function canCreate(): bool
     {
-        return false; // Mutlak dikunci, tidak bisa membuat data baru sama sekali di sini
+        return false;
     }
 
     public static function canEdit($record): bool
     {
-        return false; // Mutlak dikunci, tidak bisa mengedit data sama sekali di sini
+        return false;
     }
 
     public static function canViewAny(): bool
     {
         $user = Auth::user();
         if (!$user) return false;
-        if ($user->hasRole('super_admin')) return true;
 
-        return $user->can('view_activity') || $user->can('view_any_activity');
+        // Murni membaca izin dari Filament Shield / Policy
+        return Gate::allows('viewAny', Activity::class);
     }
 
     public static function canView($record): bool
     {
         $user = Auth::user();
         if (!$user) return false;
-        if ($user->hasRole('super_admin')) return true;
 
-        return $user->can('view_activity');
+        return Gate::allows('view', $record);
     }
 
     public static function canDelete($record): bool
     {
         $user = Auth::user();
         if (!$user) return false;
-        if ($user->hasRole('super_admin')) return true;
 
-        return $user->can('delete_activity');
+        return Gate::allows('delete', $record);
     }
 
     public static function canDeleteAny(): bool
     {
         $user = Auth::user();
         if (!$user) return false;
-        if ($user->hasRole('super_admin')) return true;
 
-        return $user->can('delete_any_activity');
+        return Gate::allows('deleteAny', Activity::class);
     }
 
     public static function getEloquentQuery(): Builder
@@ -118,26 +116,43 @@ class ActivityHistoryResource extends Resource
         $query = parent::getEloquentQuery();
         $user = Auth::user();
 
+        if (!$user) {
+            return $query->whereRaw('1 = 0');
+        }
+
         // Selalu filter hanya aktivitas yang sudah 'completed' (selesai)
         $query->where('status', 'completed');
 
-        // 1. Jika Super Admin (Program Studi dan Unit kosong) -> Lihat Semua Riwayat
-        if (empty($user->study_program_id) && empty($user->unit_id)) {
+        // Cek apakah user memiliki izin View Any melalui Gate/Shield
+        $hasViewAny = Gate::allows('viewAny', Activity::class);
+
+        // Jika TIDAK punya izin View Any, batasi secara mutlak HANYA miliknya sendiri!
+        if (!$hasViewAny) {
+            return $query->where('user_id', $user->id);
+        }
+
+        // Ambil daftar ID Program Studi & Unit milik user jika punya izin View Any
+        $studyProgramIds = $user->studyPrograms()->pluck('study_programs.id');
+        $unitIds = $user->units()->pluck('units.id');
+
+        // 1. Jika Super Admin / User tanpa batasan unit/prodi (tapi punya izin ViewAny) -> Lihat Semua
+        if ($studyProgramIds->isEmpty() && $unitIds->isEmpty()) {
             return $query;
         }
 
-        // 2. Jika Kaprodi (Program Studi terisi, Unit kosong) -> Lihat riwayat unit di bawah Prodi tersebut
-        if (!empty($user->study_program_id) && empty($user->unit_id)) {
-            return $query->whereHas('unit', function (Builder $q) use ($user) {
-                $q->where('study_program_id', $user->study_program_id);
+        // 2. Jika Kaprodi (punya Program Studi, tapi tidak punya Unit)
+        if ($studyProgramIds->isNotEmpty() && $unitIds->isEmpty()) {
+            return $query->whereHas('unit', function (Builder $q) use ($studyProgramIds) {
+                $q->whereIn('study_program_id', $studyProgramIds);
             });
         }
 
-        // 3. Jika Himpunan / Unit (Unit terisi) -> Hanya lihat riwayat unit miliknya sendiri
-        if (!empty($user->unit_id)) {
-            return $query->where('unit_id', $user->unit_id);
+        // 3. Jika Himpunan / Unit (punya Unit)
+        if ($unitIds->isNotEmpty()) {
+            return $query->whereIn('unit_id', $unitIds);
         }
 
+        // Default fallback: Hanya tampilkan data milik user yang sedang login
         return $query->where('user_id', $user->id);
     }
 }
